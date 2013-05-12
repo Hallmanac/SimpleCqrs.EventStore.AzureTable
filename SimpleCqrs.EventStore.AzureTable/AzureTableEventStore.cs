@@ -14,8 +14,8 @@
         private readonly string _accountKey;
         private readonly string _accountName;
         private readonly DomainEvent _emptyDomainEvent = new DomainEvent();
-        private readonly List<string> _aggregateRootIdsInTable = new List<string>();
-        private readonly PartitionSchema<DomainEvent> _latestVersionPartition; 
+        private List<string> _aggregateRootIdsInTable = new List<string>();
+        private PartitionSchema<DomainEvent> _latestVersionPartition; 
 
         private CloudTableContext<DomainEvent> _domainEventContext;
 
@@ -110,6 +110,7 @@
                         .SetSchemaCriteria(domainEvt => domainEvt.AggregateRootId.SerializeToString() == serializedAggregateRootId)
                         .SetIndexedPropertyCriteria(domainEvt => domainEvt.AggregateRootId.SerializeToString());
                     newPartitionSchemas.Add(eventTypeInstanceSchema);
+                    
                     if(_domainEventContext.PartitionKeysInTable.All(pk => pk != serializedAggregateRootId))
                     {
                         PartitionSchema<DomainEvent> domainEventIdSchema = _domainEventContext.CreatePartitionSchema(serializedAggregateRootId)
@@ -135,10 +136,12 @@
         private void Init(CloudStorageAccount storageAccount)
         {
             _domainEventContext = new CloudTableContext<DomainEvent>(storageAccount, this.GetPropertyName(() =>_emptyDomainEvent.AggregateRootId));
-            _domainEventContext.CreatePartitionSchema("LatestVersionPartition")
+            
+            _latestVersionPartition = _domainEventContext.CreatePartitionSchema("LatestVersionPartition")
                 .SetRowKeyCriteria(domainEvt => domainEvt.AggregateRootId.SerializeToString())
                 .SetSchemaCriteria(domainEvt => true)
                 .SetIndexedPropertyCriteria(domainEvt => domainEvt.Sequence);
+            _domainEventContext.AddPartitionSchema(_latestVersionPartition);
         }
     }
 

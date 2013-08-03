@@ -29,7 +29,7 @@
             <param name="assemblyName"></param>
             <returns>The type if it exists</returns>
         </member>
-        <member name="M:ServiceStack.Text.Common.DateTimeSerializer.Prepare(System.DateTime)">
+        <member name="M:ServiceStack.Text.Common.DateTimeSerializer.Prepare(System.DateTime,System.Boolean)">
             <summary>
             If AlwaysUseUtc is set to true then convert all DateTime to UTC.
             </summary>
@@ -73,6 +73,11 @@
         <member name="T:ServiceStack.Text.DateTimeExtensions">
             <summary>
             A fast, standards-based, serialization-issue free DateTime serailizer.
+            </summary>
+        </member>
+        <member name="T:ServiceStack.Text.WP.HashSet`1">
+            <summary>
+             A hashset implementation that uses an IDictionary
             </summary>
         </member>
         <member name="M:ServiceStack.Text.ITypeSerializer`1.CanCreateFromString(System.Type)">
@@ -148,6 +153,11 @@
             Gets or sets a value indicating if the framework should always convert <see cref="T:System.DateTime"/> to UTC format instead of local time. 
             </summary>
         </member>
+        <member name="F:ServiceStack.Text.JsConfig.sAssumeUtc">
+            <summary>
+            Gets or sets a value indicating if the framework should always assume <see cref="T:System.DateTime"/> is in UTC format if Kind is Unspecified. 
+            </summary>
+        </member>
         <member name="F:ServiceStack.Text.JsConfig.sEscapeUnicode">
             <summary>
             Gets or sets a value indicating if unicode symbols should be serialized as "\uXXXX".
@@ -156,6 +166,11 @@
         <member name="F:ServiceStack.Text.JsConfig.sIncludePublicFields">
             <summary>
             If set to true, Interface types will be prefered over concrete types when serializing.
+            </summary>
+        </member>
+        <member name="F:ServiceStack.Text.JsConfig.sMaxDepth">
+            <summary>
+            Sets the maximum depth to avoid circular dependencies
             </summary>
         </member>
         <member name="F:ServiceStack.Text.JsConfig.sModelFactory">
@@ -332,6 +347,67 @@
             This is a micro-cache; suitable when the number of terms is controllable (a few hundred, for example),
             and strictly append-only; you cannot change existing values. All key matches are on **REFERENCE**
             equality. The type is fully thread-safe.
+            </summary>
+        </member>
+        <member name="T:ServiceStack.Text.FastMember.ObjectAccessor">
+            <summary>
+            Represents an individual object, allowing access to members by-name
+            </summary>
+        </member>
+        <member name="M:ServiceStack.Text.FastMember.ObjectAccessor.Equals(System.Object)">
+            <summary>
+            Use the target types definition of equality
+            </summary>
+        </member>
+        <member name="M:ServiceStack.Text.FastMember.ObjectAccessor.GetHashCode">
+            <summary>
+            Obtain the hash of the target object
+            </summary>
+        </member>
+        <member name="M:ServiceStack.Text.FastMember.ObjectAccessor.ToString">
+            <summary>
+            Use the target's definition of a string representation
+            </summary>
+        </member>
+        <member name="M:ServiceStack.Text.FastMember.ObjectAccessor.Create(System.Object)">
+            <summary>
+            Wraps an individual object, allowing by-name access to that instance
+            </summary>
+        </member>
+        <member name="P:ServiceStack.Text.FastMember.ObjectAccessor.Item(System.String)">
+            <summary>
+            Get or Set the value of a named member for the underlying object
+            </summary>
+        </member>
+        <member name="P:ServiceStack.Text.FastMember.ObjectAccessor.Target">
+            <summary>
+            The object represented by this instance
+            </summary>
+        </member>
+        <member name="T:ServiceStack.Text.FastMember.TypeAccessor">
+            <summary>
+            Provides by-name member-access to objects of a given type
+            </summary>
+        </member>
+        <member name="M:ServiceStack.Text.FastMember.TypeAccessor.CreateNew">
+            <summary>
+            Create a new instance of this type
+            </summary>
+        </member>
+        <member name="M:ServiceStack.Text.FastMember.TypeAccessor.Create(System.Type)">
+            <summary>
+            Provides a type-specific accessor, allowing by-name access for all objects of that type
+            </summary>
+            <remarks>The accessor is cached internally; a pre-existing accessor may be returned</remarks>
+        </member>
+        <member name="P:ServiceStack.Text.FastMember.TypeAccessor.CreateNewSupported">
+            <summary>
+            Does this type support new instances via a parameterless constructor?
+            </summary>
+        </member>
+        <member name="P:ServiceStack.Text.FastMember.TypeAccessor.Item(System.Object,System.String)">
+            <summary>
+            Get or set the value of a named member on the target instance
             </summary>
         </member>
         <member name="T:ServiceStack.Text.QueryStringWriter`1">

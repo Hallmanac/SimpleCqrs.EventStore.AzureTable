@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
   <metadata>
     <id>AzureCloudTableContext</id>
-    <version>2.0.3-beta</version>
+    <version>2.0.4-beta</version>
     <title>Azure Cloud Table Context</title>
     <authors>Brian Hall</authors>
     <owners>Brian Hall</owners>
@@ -10,7 +10,9 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>In short it enables the ability for POCO's to NOT have to inherit from TableEntity and allows for secondary indexes to be defined via a contextually managed set of partitioned keys. For a full description and the source code go to https://github.com/Hallmanac/AzureCloudTable/</description>
     <summary>A wrapper around interacting with Azure Table Storage SDK (v2.0).</summary>
-    <releaseNotes>2.0.3-beta -- Updated Nuget packages.
+    <releaseNotes>2.0.4-beta -- Fixed references in nuget packages from disparate git branches.
+
+2.0.3-beta -- Updated Nuget packages.
 
 2.0.2-beta-- Updated Nuget packages to use the latest (stable) update of the Azure Storage client library.
 

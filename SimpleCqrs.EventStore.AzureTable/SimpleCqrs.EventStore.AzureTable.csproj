@@ -32,7 +32,7 @@
   <ItemGroup>
     <Reference Include="AzureCloudTableContext.Api, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\AzureCloudTableContext.2.0.3-beta\lib\net45\AzureCloudTableContext.Api.dll</HintPath>
+      <HintPath>..\packages\AzureCloudTableContext.2.0.4-beta\lib\net45\AzureCloudTableContext.Api.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.WindowsAzure.Storage, Version=2.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -47,6 +47,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AzureTableEventStore.cs" />

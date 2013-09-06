@@ -83,7 +83,15 @@
                 int latestVersionValue = 0;
                 if(!(aggregatesChecked.ContainsKey(arRootString)))
                 {
-                    DomainEvent latestVersionInstance = _domainEventContext.GetById(arRootString, _latestVersionPartition.PartitionKey);
+                    DomainEvent latestVersionInstance;
+                    try
+                    {
+                        latestVersionInstance = _domainEventContext.GetById(arRootString, _latestVersionPartition.PartitionKey);
+                    }
+                    catch(Exception e)
+                    {
+                        latestVersionInstance = null;
+                    }
                     if(latestVersionInstance != null) latestVersionValue = latestVersionInstance.Sequence;
                     aggregatesChecked.Add(arRootString, latestVersionValue);
                 }

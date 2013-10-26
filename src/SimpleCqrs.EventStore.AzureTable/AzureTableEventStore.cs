@@ -11,19 +11,15 @@
 
     public class AzureTableEventStore : IEventStore
     {
-        private readonly string _accountKey;
-        private readonly string _accountName;
+        private readonly List<string> _aggregateRootIdsInTable = new List<string>();
         private readonly DomainEvent _emptyDomainEvent = new DomainEvent();
-        private List<string> _aggregateRootIdsInTable = new List<string>();
-        private PartitionSchema<DomainEvent> _latestVersionPartition; 
 
         private CloudTableContext<DomainEvent> _domainEventContext;
+        private PartitionSchema<DomainEvent> _latestVersionPartition;
 
         public AzureTableEventStore(string accountKey, string accountName)
         {
-            _accountKey = accountKey;
-            _accountName = accountName;
-            var storageCreds = new StorageCredentials(_accountName, _accountKey);
+            var storageCreds = new StorageCredentials(accountName, accountKey);
             var storageAccount = new CloudStorageAccount(storageCreds, true);
             Init(storageAccount);
         }
@@ -43,7 +39,7 @@
 
         public void Insert(IEnumerable<DomainEvent> domainEvents)
         {
-            List<DomainEvent> domainEventsList = domainEvents as List<DomainEvent> ?? domainEvents.ToList();
+            var domainEventsList = domainEvents as List<DomainEvent> ?? domainEvents.ToList();
             VerifyPartitionsExist(domainEventsList);
             CheckAgainstLatestSequence(domainEventsList);
             _domainEventContext.InsertOrReplace(domainEventsList.ToArray());
@@ -77,10 +73,10 @@
         private void CheckAgainstLatestSequence(List<DomainEvent> domainEventsList)
         {
             var aggregatesChecked = new Dictionary<string, int>();
-            foreach(DomainEvent domainEvent in domainEventsList)
+            foreach(var domainEvent in domainEventsList)
             {
-                string arRootString = domainEvent.AggregateRootId.SerializeToString();
-                int latestVersionValue = 0;
+                var arRootString = domainEvent.AggregateRootId.SerializeToString();
+                var latestVersionValue = 0;
                 if(!(aggregatesChecked.ContainsKey(arRootString)))
                 {
                     DomainEvent latestVersionInstance;
@@ -88,53 +84,68 @@
                     {
                         latestVersionInstance = _domainEventContext.GetById(arRootString, _latestVersionPartition.PartitionKey);
                     }
-                    catch(Exception e)
+                    catch(Exception)
                     {
                         latestVersionInstance = null;
                     }
                     if(latestVersionInstance != null) latestVersionValue = latestVersionInstance.Sequence;
                     aggregatesChecked.Add(arRootString, latestVersionValue);
                 }
-                if(aggregatesChecked[arRootString] > domainEvent.Sequence) 
-                    throw new EventStoreConcurrencyException(aggregatesChecked[arRootString], domainEvent, domainEventsList);
+                if(aggregatesChecked[arRootString] > domainEvent.Sequence) throw new EventStoreConcurrencyException(aggregatesChecked[arRootString], domainEvent, domainEventsList);
             }
         }
 
-        private void VerifyPartitionsExist(List<DomainEvent> domainEventsList)
+        private void VerifyPartitionsExist(IEnumerable<DomainEvent> domainEventsList)
         {
             var newPartitionSchemas = new List<PartitionSchema<DomainEvent>>();
-            foreach(DomainEvent domainEvent in domainEventsList)
+            foreach(var domainEvent in domainEventsList)
             {
-                string serializedAggregateRootId = domainEvent.AggregateRootId.SerializeToString();
+                var serializedAggregateRootId = domainEvent.AggregateRootId.SerializeToString();
                 // Check if the Aggregate Root ID is in the list of id strings
-                if(_aggregateRootIdsInTable.All(rootId => rootId != serializedAggregateRootId)) 
-                    _aggregateRootIdsInTable.Add(serializedAggregateRootId);
-                
+                if(_aggregateRootIdsInTable.All(rootId => rootId != serializedAggregateRootId)) _aggregateRootIdsInTable.Add(serializedAggregateRootId);
                 // Check if there is a partition for the given domain event type followed by one for the AggregateRootId
                 if(_domainEventContext.PartitionKeysInTable.All(pk => pk != domainEvent.GetType().Name))
                 {
-                    PartitionSchema<DomainEvent> eventTypeInstanceSchema = _domainEventContext.CreatePartitionSchema(domainEvent.GetType().Name)
-                        .SetRowKeyCriteria(domainEvt => _domainEventContext.GetChronologicalBasedRowKey())
-                        .SetSchemaCriteria(domainEvt => domainEvt.AggregateRootId.SerializeToString() == serializedAggregateRootId)
-                        .SetIndexedPropertyCriteria(domainEvt => domainEvt.AggregateRootId.SerializeToString());
+                    var eventTypeInstanceSchema = _domainEventContext.CreatePartitionSchema(domainEvent.GetType().Name)
+                                                                     .SetRowKeyCriteria(
+                                                                         domainEvt =>
+                                                                             _domainEventContext.GetChronologicalBasedRowKey())
+                                                                     .SetSchemaCriteria(
+                                                                         domainEvt =>
+                                                                             domainEvt.AggregateRootId.SerializeToString() ==
+                                                                             serializedAggregateRootId)
+                                                                     .SetIndexedPropertyCriteria(
+                                                                         domainEvt =>
+                                                                             domainEvt.AggregateRootId.SerializeToString());
                     newPartitionSchemas.Add(eventTypeInstanceSchema);
-                    
                     if(_domainEventContext.PartitionKeysInTable.All(pk => pk != serializedAggregateRootId))
                     {
-                        PartitionSchema<DomainEvent> domainEventIdSchema = _domainEventContext.CreatePartitionSchema(serializedAggregateRootId)
-                            .SetRowKeyCriteria(domainEvt => _domainEventContext.GetChronologicalBasedRowKey())
-                            .SetSchemaCriteria(domainEvt => domainEvt.AggregateRootId.SerializeToString() == serializedAggregateRootId)
-                            .SetIndexedPropertyCriteria(domainEvt => domainEvt.GetType().Name);
+                        var domainEventIdSchema = _domainEventContext.CreatePartitionSchema(serializedAggregateRootId)
+                                                                     .SetRowKeyCriteria(
+                                                                         domainEvt =>
+                                                                             _domainEventContext.GetChronologicalBasedRowKey())
+                                                                     .SetSchemaCriteria(
+                                                                         domainEvt =>
+                                                                             domainEvt.AggregateRootId.SerializeToString() ==
+                                                                             serializedAggregateRootId)
+                                                                     .SetIndexedPropertyCriteria(
+                                                                         domainEvt => domainEvt.GetType().Name);
                         newPartitionSchemas.Add(domainEventIdSchema);
                     }
                 }
                     // Check to see if there is a partition key for the given AggregateRootId.
                 else if(_domainEventContext.PartitionKeysInTable.All(pk => pk != serializedAggregateRootId))
                 {
-                    PartitionSchema<DomainEvent> domainEventIdSchema = _domainEventContext.CreatePartitionSchema(serializedAggregateRootId)
-                        .SetRowKeyCriteria(domainEvt => _domainEventContext.GetChronologicalBasedRowKey())
-                        .SetSchemaCriteria(domainEvt => domainEvt.AggregateRootId.SerializeToString() == serializedAggregateRootId)
-                        .SetIndexedPropertyCriteria(domainEvt => domainEvt.GetType().Name);
+                    var domainEventIdSchema = _domainEventContext.CreatePartitionSchema(serializedAggregateRootId)
+                                                                 .SetRowKeyCriteria(
+                                                                     domainEvt =>
+                                                                         _domainEventContext.GetChronologicalBasedRowKey())
+                                                                 .SetSchemaCriteria(
+                                                                     domainEvt =>
+                                                                         domainEvt.AggregateRootId.SerializeToString() ==
+                                                                         serializedAggregateRootId)
+                                                                 .SetIndexedPropertyCriteria(
+                                                                     domainEvt => domainEvt.GetType().Name);
                     newPartitionSchemas.Add(domainEventIdSchema);
                 }
             }
@@ -143,12 +154,11 @@
 
         private void Init(CloudStorageAccount storageAccount)
         {
-            _domainEventContext = new CloudTableContext<DomainEvent>(storageAccount, this.GetPropertyName(() =>_emptyDomainEvent.AggregateRootId));
-            
+            _domainEventContext = new CloudTableContext<DomainEvent>(storageAccount, this.GetPropertyName(() => _emptyDomainEvent.AggregateRootId));
             _latestVersionPartition = _domainEventContext.CreatePartitionSchema("LatestVersionPartition")
-                .SetRowKeyCriteria(domainEvt => domainEvt.AggregateRootId.SerializeToString())
-                .SetSchemaCriteria(domainEvt => true)
-                .SetIndexedPropertyCriteria(domainEvt => domainEvt.Sequence);
+                                                         .SetRowKeyCriteria(domainEvt => domainEvt.AggregateRootId.SerializeToString())
+                                                         .SetSchemaCriteria(domainEvt => true)
+                                                         .SetIndexedPropertyCriteria(domainEvt => domainEvt.Sequence);
             _domainEventContext.AddPartitionSchema(_latestVersionPartition);
         }
     }

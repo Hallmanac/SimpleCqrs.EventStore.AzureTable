@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
   <metadata>
     <id>AzureCloudTableContext</id>
-    <version>2.0.6-beta</version>
+    <version>2.0.7-beta</version>
     <title>Azure Cloud Table Context</title>
     <authors>Brian Hall</authors>
     <owners>Brian Hall</owners>
@@ -10,7 +10,9 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>In short it enables the ability for POCO's to NOT have to inherit from TableEntity and allows for secondary indexes to be defined via a contextually managed set of partitioned keys. For a full description and the source code go to https://github.com/Hallmanac/AzureCloudTable/</description>
     <summary>A wrapper around interacting with Azure Table Storage SDK (v2.1.0).</summary>
-    <releaseNotes>2.0.6-beta -- Updated the actual version number of the assembly as well as changed the required dependency for WindowsAzure.Storage to be the latest v2.1.0.
+    <releaseNotes>2.0.7-beta -- Updated nuget packages to latest versions. 
+
+2.0.6-beta -- Updated the actual version number of the assembly as well as changed the required dependency for WindowsAzure.Storage to be the latest v2.1.0.
 
 2.0.5-beta -- Fixed reference to incorrect version of Microsoft.WindowsAzure.Storage. It was pointed to v2.0.0 and is now correctly pointed to v2.1.0.
 
@@ -27,13 +29,11 @@
 1.1.2 - Renamed some fluent api methods, added a static way to set the RowKeyCriteria to be a Chronological based (or Reverse Chronological Based) row key.
 
 1.1.0 - Made breaking changes to API. Simplified it to have only one partition key per schema.</releaseNotes>
-    <copyright />
-    <language />
     <tags>Azure Table Storage Cloud Context Azure Table CloudTableContext Context</tags>
     <dependencies>
-      <dependency id="ServiceStack.Text" version="3.9.35" />
-      <dependency id="Microsoft.WindowsAzure.ConfigurationManager" version="1.8.0.0" />
-      <dependency id="WindowsAzure.Storage" version="2.1.0.0" />
+      <dependency id="ServiceStack.Text" version="3.9.69" />
+      <dependency id="WindowsAzure.Storage" version="2.1.0.3" />
+      <dependency id="Microsoft.WindowsAzure.ConfigurationManager" version="2.0.1.0" />
     </dependencies>
     <frameworkAssemblies>
       <frameworkAssembly assemblyName="System.Core" targetFramework=".NETFramework4.5" />
